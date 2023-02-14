@@ -8,11 +8,9 @@
 #include <ros.h>
 #include <std_msgs/String.h>
 #include <std_msgs/UInt16.h>
-#include <std_msgs/Float32.h>
 
 ros::NodeHandle  nodeHandleROBO;
 
-std_msgs::Float32 msgGx;
 std_msgs::UInt16 msgMode;
 std_msgs::UInt16 msgEye;
 std_msgs::UInt16 msgLine;
@@ -295,15 +293,15 @@ void eyeFunction () {
     
     if(rightDistance > leftDistance) {
       right();
-      delay(300 + random(150));
+      delay(300 + random(450));
     }
     else if(rightDistance < leftDistance) {
       left();
-      delay(300 + random(150));
+      delay(300 + random(450));
     }
     else if((rightDistance <= backDistance) || (leftDistance <= backDistance)) {
       back();
-      delay(150 + random(75));
+      delay(150 + random(225));
     }
   }
   
@@ -370,7 +368,7 @@ void lineFunction () {
 
 ///////////////////////////////////////////////////////////////
 
-void subModeCallback(const std_msgs::UInt16& msgMode) {
+void subscriberCallback(const std_msgs::UInt16& msgMode) {
 
   if (msgMode.data == 0) {
     activeEyeSensor = false;
@@ -392,15 +390,7 @@ void subModeCallback(const std_msgs::UInt16& msgMode) {
 
 ///////////////////////////////////////////////////////////////
 
-void subGxCallback(const std_msgs::Float32& msgGx) {
-  Serial.print("msgGx data: ");
-  Serial.println(msgGx.data);
-}
-
-///////////////////////////////////////////////////////////////
-
-ros::Subscriber<std_msgs::Float32> sub_gx("gx", &subGxCallback);
-ros::Subscriber<std_msgs::UInt16> sub_mode("mode", &subModeCallback);
+ros::Subscriber<std_msgs::UInt16> mode_subscriber("mode", &subscriberCallback);
 ros::Publisher pub_eye("eye", &msgEye);
 ros::Publisher pub_line("line", &msgLine);
 
@@ -417,8 +407,7 @@ void setup() {
   myservo.write(90);
 
   nodeHandleROBO.initNode();
-  nodeHandleROBO.subscribe(sub_gx);
-  nodeHandleROBO.subscribe(sub_mode);
+  nodeHandleROBO.subscribe(mode_subscriber);
   nodeHandleROBO.advertise(pub_eye);
   nodeHandleROBO.advertise(pub_line);
 
