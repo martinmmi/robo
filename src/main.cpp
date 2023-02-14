@@ -8,9 +8,11 @@
 #include <ros.h>
 #include <std_msgs/String.h>
 #include <std_msgs/UInt16.h>
+#include <std_msgs/Float32.h>
 
 ros::NodeHandle  nodeHandleROBO;
 
+std_msgs::Float32 msgGx;
 std_msgs::UInt16 msgMode;
 std_msgs::UInt16 msgEye;
 std_msgs::UInt16 msgLine;
@@ -43,8 +45,8 @@ int i = 0;
 #define LT_L      !digitalRead(2)    
 
 #define carSpeedMin       0     //Change
-#define carSpeed        100     //Change
-#define carSpeedturn    180     //Change
+#define carSpeed        120     //Change
+#define carSpeedturn    120     //Change
 #define carSpeedMax     255     //Change
 
 bool activeLineSensor = false;
@@ -368,7 +370,7 @@ void lineFunction () {
 
 ///////////////////////////////////////////////////////////////
 
-void subscriberCallback(const std_msgs::UInt16& msgMode) {
+void subModeCallback(const std_msgs::UInt16& msgMode) {
 
   if (msgMode.data == 0) {
     activeEyeSensor = false;
@@ -390,7 +392,15 @@ void subscriberCallback(const std_msgs::UInt16& msgMode) {
 
 ///////////////////////////////////////////////////////////////
 
-ros::Subscriber<std_msgs::UInt16> mode_subscriber("mode", &subscriberCallback);
+void subGxCallback(const std_msgs::Float32& msgGx) {
+  Serial.print("msgGx data: ");
+  Serial.println(msgGx.data);
+}
+
+///////////////////////////////////////////////////////////////
+
+ros::Subscriber<std_msgs::Float32> sub_gx("gx", &subGxCallback);
+ros::Subscriber<std_msgs::UInt16> sub_mode("mode", &subModeCallback);
 ros::Publisher pub_eye("eye", &msgEye);
 ros::Publisher pub_line("line", &msgLine);
 
@@ -407,7 +417,8 @@ void setup() {
   myservo.write(90);
 
   nodeHandleROBO.initNode();
-  nodeHandleROBO.subscribe(mode_subscriber);
+  nodeHandleROBO.subscribe(sub_gx);
+  nodeHandleROBO.subscribe(sub_mode);
   nodeHandleROBO.advertise(pub_eye);
   nodeHandleROBO.advertise(pub_line);
 
