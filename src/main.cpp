@@ -18,8 +18,8 @@ std_msgs::UInt16 msgLine;
 
 Servo myservo;
 
-int minAngle = 700;
-int maxAngle = 2150;
+int minAngle = 650;
+int maxAngle = 2100;
 int rightDistance = 0, leftDistance = 0, middleDistance = 0;
 int echoPin = A4;               
 int trigPin = A5;               
@@ -42,10 +42,11 @@ int i = 0;
 #define LT_M      !digitalRead(4)     
 #define LT_L      !digitalRead(2)    
 
-#define carSpeedMin       0     //Change
-#define carSpeed        120     //Change
-#define carSpeedturn    120     //Change
-#define carSpeedMax     255     //Change
+#define carSpeedMin         0     //Change
+#define carSpeed          120     //Change
+#define carSpeedturn      120     //Change
+#define carSpeedturn_eye  160     //Change
+#define carSpeedMax       255     //Change
 
 bool activeLineSensor = false;
 bool activeEyeSensor = false;
@@ -247,6 +248,49 @@ void right() {
   }
 }
 
+void back_eye() {
+ 
+  analogWrite(ENA, carSpeedturn_eye);
+  analogWrite(ENB, carSpeedturn_eye);
+  digitalWrite(IN1, LOW);
+  digitalWrite(IN2, HIGH);
+  digitalWrite(IN3, HIGH);
+  digitalWrite(IN4, LOW);
+
+  if ((millis() - lastBack > 1000)) {
+      Serial.println("B");
+      lastBack = millis();
+  }
+}
+
+void left_eye() {
+  analogWrite(ENA, carSpeedturn_eye);
+  analogWrite(ENB, carSpeedturn_eye);
+  digitalWrite(IN1, LOW);
+  digitalWrite(IN2, HIGH);
+  digitalWrite(IN3, LOW);
+  digitalWrite(IN4, HIGH); 
+
+  if ((millis() - lastLeft > 1000)) {
+      Serial.println("L");
+      lastLeft = millis();
+  }
+}
+
+void right_eye() {
+  analogWrite(ENA, carSpeedturn_eye);
+  analogWrite(ENB, carSpeedturn_eye);
+  digitalWrite(IN1, HIGH);
+  digitalWrite(IN2, LOW);
+  digitalWrite(IN3, HIGH);
+  digitalWrite(IN4, LOW);
+
+  if ((millis() - lastRight > 1000)) {
+      Serial.println("R");
+      lastRight = millis();
+  }
+}
+
 void stop() {
   digitalWrite(ENA, LOW);
   digitalWrite(ENB, LOW);
@@ -292,16 +336,16 @@ void eyeFunction () {
     delay(500);
     
     if(rightDistance > leftDistance) {
-      right();
-      delay(300 + random(450));
+      right_eye();
+      delay(300 + random(400));
     }
     else if(rightDistance < leftDistance) {
-      left();
-      delay(300 + random(450));
+      left_eye();
+      delay(300 + random(400));
     }
     else if((rightDistance <= backDistance) || (leftDistance <= backDistance)) {
-      back();
-      delay(150 + random(225));
+      back_eye();
+      delay(150 + random(200));
     }
   }
   
@@ -355,13 +399,13 @@ void lineFunction () {
     else if(LT_R) { 
       msgLine.data = LT_R;
       right();
-      while(LT_R);                             
+      while(LT_R);                           
     }
 
     else if(LT_L) {
       msgLine.data = LT_L;
       left();
-      while(LT_L);  
+      while(LT_L);
     }
   }
 }
